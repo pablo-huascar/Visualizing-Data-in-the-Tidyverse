@@ -53,6 +53,17 @@ fast_food_sales |>
 # Problem 2
 
 ```{r}
-
+fast_food_sales |>
+  group_by(restaurant) |> 
+  mutate(average_sales = mean(us_sales)) |> 
+  ggplot(aes(fct_reorder(restaurant,
+                         average_sales),
+             average_sales))+
+  geom_bar(stat="identity")+
+  coord_flip()+
+  labs(x = "Restaurant",
+       y =  "Average sales per unit store (in the thousands)")+
+  scale_x_continuous(labels = )
+  theme_classic()
 ```
 
