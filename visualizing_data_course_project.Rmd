@@ -19,45 +19,22 @@ library(janitor)
 library(ggrepel)
 ```
 
-# Getting the data
-## URLs for the data
+# Fast Food Sales
 
-```{r}
-url_sales <- 
-  "https://d3c33hcgiwev3.cloudfront.net/ERgbPUSBTj2YGz1Egd49gA_64d91f329b334df59109113c3084708f_data_fastfood_sales.csv?Expires=1678233600&Signature=fj1~zvdeWeL5d5XUtpCtXf0IrfD7C792~rR0jHGArJNRFPjQS~K8KRCgrh6ZPlEzJmA1HIINtWVxL8mQP5s-~5IH8-IelzTqCs~bmSQb6cRErAmlsLinEh3F-wKn8ZhwevHtcHfgUBUg0vhi2slbgo3s7smPoUC2LDP8hxMleek_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A"
-
-url_calories <-
-  "https://d3c33hcgiwev3.cloudfront.net/-LjVvbxIR5G41b28SMeReA_1a02baf08f0c4c479cbd944461c41ced_data_fastfood_calories.csv?Expires=1678233600&Signature=PBpE70nCKsugODkvQCQjeBPX5vWc5DG2basEDk2fXWmdw~AI5WPZDJaVV~XdQ05ys~kCf-FFU4i1UMbP2tplDUkThSqhxQVjAe5CHJYfIFgqnhIo1bLO~0N8Jx1-~A4Ai0yxU2vMFUhfix80YJbJi6PJVz9fU1USVXtlpNYqI-U_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A"
-```
-
-## Creating the tibbles
+## Getting the data
 
 ```{r # Getting the data, message=FALSE, warning=FALSE}
 fast_food_sales <- 
-  read_csv(url_sales) %>% 
-  clean_names()
-
-fast_food_calories <- 
-  read_csv(url_calories) %>% 
+  read_csv("https://d3c33hcgiwev3.cloudfront.net/ERgbPUSBTj2YGz1Egd49gA_64d91f329b334df59109113c3084708f_data_fastfood_sales.csv?Expires=1678233600&Signature=fj1~zvdeWeL5d5XUtpCtXf0IrfD7C792~rR0jHGArJNRFPjQS~K8KRCgrh6ZPlEzJmA1HIINtWVxL8mQP5s-~5IH8-IelzTqCs~bmSQb6cRErAmlsLinEh3F-wKn8ZhwevHtcHfgUBUg0vhi2slbgo3s7smPoUC2LDP8hxMleek_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A") %>% 
   clean_names()
 ```
-
-
-# Wrangling Data
-
-```{r}
-fast_food_sales <- 
-  fast_food_sales |>
-  mutate(restaurant = as_factor(restaurant),
-         prop = (num_franchised_stores/unit_count) |> 
-           round(2))
-```
-
 
 # Problem 1
 
 ```{r}
 fast_food_sales |>
+  mutate(restaurant = as_factor(restaurant),
+         prop = (num_franchised_stores/unit_count)) |> 
   ggplot(aes(us_sales,
              unit_count,
              colour = prop,
@@ -69,7 +46,13 @@ fast_food_sales |>
   geom_text_repel(color = "black")+
   labs(x = "US sales in millions (log 10 scale)",
        y = "Total number of stores (log 10 scale)",
-       color = "Proportion of stores franchised")
+       color = "Proportion of stores franchised")+
+  theme_bw()
 ```
 
+# Problem 2
+
+```{r}
+
+```
 
