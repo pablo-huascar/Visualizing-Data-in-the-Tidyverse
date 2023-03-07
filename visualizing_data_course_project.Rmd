@@ -11,27 +11,23 @@ output:
 editor_options:
   chunk_output_type: console
 ---
-# Loading packages
-
+# Loading Packages
 ```{r Loading packages, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(janitor)
 library(ggrepel)
+library(scales)
+library(directlabels)
 ```
-
 # Fast Food Sales
-
-## Getting the data
-
+## Getting the Data
 ```{r # Getting the data, message=FALSE, warning=FALSE}
 fast_food_sales <- 
-  read_csv("https://d3c33hcgiwev3.cloudfront.net/ERgbPUSBTj2YGz1Egd49gA_64d91f329b334df59109113c3084708f_data_fastfood_sales.csv?Expires=1678233600&Signature=fj1~zvdeWeL5d5XUtpCtXf0IrfD7C792~rR0jHGArJNRFPjQS~K8KRCgrh6ZPlEzJmA1HIINtWVxL8mQP5s-~5IH8-IelzTqCs~bmSQb6cRErAmlsLinEh3F-wKn8ZhwevHtcHfgUBUg0vhi2slbgo3s7smPoUC2LDP8hxMleek_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A") %>% 
+  read_csv("https://d3c33hcgiwev3.cloudfront.net/ERgbPUSBTj2YGz1Egd49gA_64d91f329b334df59109113c3084708f_data_fastfood_sales.csv?Expires=1678233600&Signature=fj1~zvdeWeL5d5XUtpCtXf0IrfD7C792~rR0jHGArJNRFPjQS~K8KRCgrh6ZPlEzJmA1HIINtWVxL8mQP5s-~5IH8-IelzTqCs~bmSQb6cRErAmlsLinEh3F-wKn8ZhwevHtcHfgUBUg0vhi2slbgo3s7smPoUC2LDP8hxMleek_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A")  |>  
   clean_names()
 ```
-
 # Problem 1
-
-```{r}
+```{r Problem 1, dpi=300}
 fast_food_sales |>
   mutate(restaurant = as_factor(restaurant),
          prop = (num_franchised_stores/unit_count)) |> 
@@ -51,19 +47,88 @@ fast_food_sales |>
 ```
 
 # Problem 2
-
-```{r}
+```{r Problem 2, dpi=300}
 fast_food_sales |>
-  group_by(restaurant) |> 
-  mutate(average_sales = mean(us_sales)) |> 
+  mutate(average_sales = round(average_sales)) |>
+  group_by(restaurant) |>
   ggplot(aes(fct_reorder(restaurant,
                          average_sales),
              average_sales))+
   geom_bar(stat="identity")+
   coord_flip()+
+  geom_dl(aes(label = dollar(average_sales)),
+          method = list("last.points",
+                        cex = 0.6))+
   labs(x = "Restaurant",
        y =  "Average sales per unit store (in the thousands)")+
-  scale_x_continuous(labels = )
+  scale_y_continuous(labels = label_dollar())+
   theme_classic()
 ```
+
+# Fast Food Calories
+## Getting the Data
+```{r Getting the Data, message=FALSE, warning=FALSE}
+fast_food_calories <- 
+  read_csv("https://d3c33hcgiwev3.cloudfront.net/-LjVvbxIR5G41b28SMeReA_1a02baf08f0c4c479cbd944461c41ced_data_fastfood_calories.csv?Expires=1678320000&Signature=IR9OZuMEqUwrFJHl6I3b93tFCcK9bZ918SnqYWKgPr37c7VFrIB4KD85SwySCHTJlDcN1gn4~sc-gzQC0BHGh4qQteZ-jd5t1wf2V7QA3BdWdroLdc6Kvy1faAb1o8crLfMo0KbtcEk-aC3rXiHDQSOPNe0wSflHfcjhZ100ls0_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A") |> 
+  clean_names()
+```
+# Problem 3
+```{r Problem 3, dpi=300}
+fast_food_calories |>
+  ggplot(aes(calories,
+                 sodium,
+             label = item))+
+  geom_hline(yintercept = 2300)+
+  geom_point()+
+  geom_text_repel(data = fast_food_calories |> filter(sodium >= 2300),
+                  size = 1,
+                  nudge_y = 1, 
+                  nudge_x = 3,
+                  max.overlaps = Inf,
+                  ylim = c(3000,6500),
+                  xlim = c(550,2500),
+                  force = 2)+
+  labs(x = "Calories", y = "Sodium (mg)")+
+  theme_bw()+
+  facet_wrap(~restaurant)
+```
+# Problem 4
+```{r}
+fast_food_calories %>%
+  mutate(is_salad = case_when(str_detect(item, "Salad") ~ TRUE,
+                              TRUE ~ FALSE))  |> 
+  ggplot(aes(calories,
+             fct_reorder(restaurant,
+                         calories)))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(aes(color = factor(is_salad)))+
+  scale_x_log10()+
+  labs(x = "Calories (log10 scale",
+       y = "Restaurant",
+       color = "Is the entree a salad?")+
+  scale_color_discrete(labels = c("Not a salad",
+                                 "Salad"))
+```
+# Problem 5
+
+```{r}
+fast_food_calories |>
+  filter(restaurant != "Taco Bell") |> 
+  group_by(restaurant,
+           item) |> 
+  mutate(median_sugar = median(sugar)) |> 
+  glimpse()
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
